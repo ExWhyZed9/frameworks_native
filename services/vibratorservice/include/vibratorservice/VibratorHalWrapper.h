@@ -22,7 +22,6 @@
 #include <android/hardware/vibrator/BnVibratorCallback.h>
 #include <android/hardware/vibrator/IVibrator.h>
 #include <binder/IServiceManager.h>
-#include <cutils/properties.h>
 
 #include <vibratorservice/VibratorCallbackScheduler.h>
 
@@ -332,15 +331,8 @@ public:
             std::shared_ptr<CallbackScheduler> scheduler, sp<hardware::vibrator::IVibrator> handle,
             std::function<HalResult<sp<hardware::vibrator::IVibrator>>()> reconnectFn =
                     []() {
-                        char propStr[PROP_VALUE_MAX] = {0};
-                        property_get("sys.haptic.motor", propStr, "");
-                        if (!strcmp(propStr, "linear") || !strcmp(propStr, "zlinear")){
-                            return HalResult<sp<hardware::vibrator::IVibrator>>::ok(
-                                    checkVintfService<hardware::vibrator::IVibrator>(String16("vibratorfeature")));
-                        } else{
-                            return HalResult<sp<hardware::vibrator::IVibrator>>::ok(
-                                    checkVintfService<hardware::vibrator::IVibrator>());
-                        }
+                        return HalResult<sp<hardware::vibrator::IVibrator>>::ok(
+                                checkVintfService<hardware::vibrator::IVibrator>());
                     })
           : HalWrapper(std::move(scheduler)),
             mReconnectFn(reconnectFn),
